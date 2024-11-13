@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: divelog-configmap
+data:
+  MYSQL_HOST: mysql-service.default.svc.cluster.local
+  MYSQL_DATABASE: dive_log
+  MYSQL_USER: divelog

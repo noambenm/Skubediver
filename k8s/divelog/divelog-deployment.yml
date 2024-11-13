@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: divelog-deployment
+  labels:
+    app: divelog
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+      app: divelog
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: divelog
+        tier: backend
+    spec:
+      containers:
+      - name: divelog-container
+        image: divelog-service-image
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        env:
+          - name: MYSQL_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: divelog-configmap
+                key: MYSQL_HOST
+          - name: MYSQL_USER
+            valueFrom:
+              configMapKeyRef:
+                name: divelog-configmap
+                key: MYSQL_USER
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: divelog-configmap
+                key: MYSQL_DATABASE
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: divelog-secret
+                key: MYSQL_PASSWORD

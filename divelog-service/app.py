@@ -1,13 +1,11 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 from mysql.connector import Error
-from flask_cors import CORS
 import os
 import time
 import logging
 
 app = Flask(__name__)
-CORS(app)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,26 +18,6 @@ db_config = {
     'user': os.getenv('MYSQL_USER'),
     'password': os.getenv('MYSQL_PASSWORD'),
 }
-
-def wait_for_db(max_retries=30, delay_seconds=2):
-    """Wait for database to be ready with retry mechanism"""
-    retry_count = 0
-    while retry_count < max_retries:
-        try:
-            connection = mysql.connector.connect(**db_config)
-            if connection.is_connected():
-                connection.close()
-                logger.info("Successfully connected to MySQL database")
-                return True
-        except Error as e:
-            retry_count += 1
-            logger.warning(f"Attempt {retry_count}/{max_retries} to connect to database failed: {e}")
-            if retry_count < max_retries:
-                logger.info(f"Retrying in {delay_seconds} seconds...")
-                time.sleep(delay_seconds)
-    
-    logger.error("Maximum retry attempts reached. Could not connect to database.")
-    return False
 
 def create_dive_log_table():
     """Create dive_logs table with retry mechanism"""
@@ -131,18 +109,24 @@ def add_dive_log():
             "received_data": data if 'data' in locals() else None
         }), 500
 
-def initialize_app():
-    """Initialize the application with database connection and table creation"""
-    if wait_for_db():
+def initialize_app() -> bool:
+    """Initialize the application with database connection and table creation
+    
+    Returns:
+        bool: True if initialization successful, False otherwise
+    """
+    try:
         if create_dive_log_table():
             logger.info("Application initialized successfully")
             return True
-        else:
-            logger.error("Failed to create table")
-            return False
-    else:
-        logger.error("Failed to connect to database")
+        
+        logger.error("Failed to create table")
         return False
+        
+    except Exception as e:
+        logger.error(f"Initialization failed: {e}")
+        return False
+
 
 if __name__ == '__main__':
     # Initialize the app before running

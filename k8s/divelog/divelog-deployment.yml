@@ -18,10 +18,35 @@ spec:
     spec:
       containers:
       - name: divelog-container
-        image: divelog-service-image
-        imagePullPolicy: IfNotPresent
+        image: noambenm/skubediver-divelog:v1.0.1-alpine3.20
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
+        env:
+          - name: MYSQL_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: divelog-configmap
+                key: MYSQL_HOST
+          - name: MYSQL_USER
+            valueFrom:
+              configMapKeyRef:
+                name: divelog-configmap
+                key: MYSQL_USER
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: divelog-configmap
+                key: MYSQL_DATABASE
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: divelog-secret
+                key: MYSQL_PASSWORD
+      initContainers:
+      - name: init-container
+        image: noambenm/skubediver-divelog-init:v1.0-alpine3.20
+        imagePullPolicy: Always
         env:
           - name: MYSQL_HOST
             valueFrom:

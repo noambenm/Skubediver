@@ -2,3 +2,5 @@ mysql/.env
 divelog-service/.env
 k8s/divelog/divelog-secret.yml
 k8s/mysql/mysql-secret.yml
+docker-compose.yml
+
